@@ -1,4 +1,3 @@
-```markdown
 # 🛒 Online Shopping Site (Phase 2 — Placeholder)
 
 This project is a **Flask web app** that simulates a basic H-E-B–style online shopping site.  
@@ -9,7 +8,6 @@ Later phases will add CSS styling, JavaScript interactions, and a MongoDB backen
 
 ## 📂 Project Structure
 ```
-
 online-shopping-site/
 ├─ app/
 │  ├─ **init**.py         # Flask app factory + routes
@@ -25,8 +23,7 @@ online-shopping-site/
 ├─ run.py                 # Entry point
 ├─ requirements.txt       # Python dependencies
 └─ README.md
-
-````
+```
 
 ---
 
@@ -36,64 +33,25 @@ Follow these steps to run the project on your machine.
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/<your-username>/online-shopping-site.git
+git clone https://github.com/Khaoshimself/online-shopping-site.git
 cd online-shopping-site
-````
+```
 
-### 2. Create a virtual environment (venv)
-
-This keeps project packages separate from your system Python.
-
+### 2. Copy and edit .env
 ```bash
-python3 -m venv .venv
+cp .env-example .env
+# set usernames and passwords
+vim .env
 ```
 
-### 3. Activate the venv
-
-* On **Mac/Linux**:
-
-  ```bash
-  source .venv/bin/activate
-  ```
-* On **Windows (PowerShell)**:
-
-  ```powershell
-  .venv\Scripts\Activate.ps1
-  ```
-
-After activation, your prompt will look like:
-
-```
-(.venv) yourname@computer %
-```
-
-### 4. Install dependencies
-
-This project uses `requirements.txt` to list all needed Python packages.
-
+### 3. Startup docker-compose
 ```bash
-pip install -r requirements.txt
+docker compose up -d --build
 ```
 
-Dependencies include:
-
-* **Flask** (the web framework)
-* **python-dotenv** (load environment variables)
-
-### 5. Run the Flask app
-
-```bash
-export FLASK_DEBUG=1        # (Mac/Linux)
-# set FLASK_DEBUG=1         # (Windows PowerShell)
-
-flask --app run run
-```
-
-You should see:
-
-```
-* Running on http://127.0.0.1:5000
-```
+### 4. Check out the site
+- [Site is on port 8000](http://127.0.0.1:8000)
+- [MongoExpress is on port 8888](http://127.0.0.1:8888)
 
 ---
 
@@ -119,10 +77,10 @@ Later phases will add styling, search/sort, a real cart, and database connection
 
 ## 💡 Notes
 
-* Don’t commit your `.venv/` folder — it’s in `.gitignore`.
-* Always run `pip install -r requirements.txt` when new dependencies are added.
-* If you mess up your venv, delete `.venv/` and recreate it with step 2.
+* Don’t commit your `.venv` folder, or `.env` — it’s in `.gitignore`.
+* Always run `docker compose up -d --build` when new dependencies are added.
+* If you mess up your docker enviornment run `docker compose rm -s -v` to remove the containers and get a fresh start
 
 ---
 
-👥 **IMPORTANT:** Everyone should clone this repo, set up a venv, install requirements, and confirm they can load the placeholder pages before diving into CSS/JS.
+👥 **IMPORTANT:** Everyone should clone this repo, set up a .env, load docker, and confirm they can load the placeholder pages before diving into CSS/JS.
