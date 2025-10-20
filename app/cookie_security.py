@@ -1,4 +1,5 @@
-from records.keys import Key, db_key_get_or_create
+from app.records.keys import db_key_get_or_create
+from app.records.keymodel import Key
 
 from ecdsa import SigningKey, VerifyingKey, NIST384p
 

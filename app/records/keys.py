@@ -1,13 +1,7 @@
-from typing import TypedDict
 from ecdsa import SigningKey, VerifyingKey, NIST384p
 
-from database import db
-
-
-class Key(TypedDict):
-    name: str
-    private: str
-    public: str
+from app.database import db
+from app.records.keymodel import Key
 
 
 def db_key_create(name: str) -> Key | None:

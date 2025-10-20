@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Sign Up (Placeholder)</h2>
+<h2>Update User (Placeholder)</h2>
 <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
 <p>
@@ -8,13 +8,19 @@
     {{ form.username(size=32) }}
 </p>
 <p>
-    {{ form.password.label }}<br>
-    {{ form.password(size=32) }}
+    {{ form.new_password.label }}<br>
+    {{ form.new_password(size=32) }}
 </p>
+
 <p>
     {{ form.verify_password.label }}<br>
     {{ form.verify_password(size=32) }}
 </p>
+<p>
+    {{ form.current_password.label }}<br>
+    {{ form.current_password(size=32) }}
+</p>
 <p>{{ form.submit() }}</p>
 </form>
+    <a href="deleteuser">Delete Account</a>
 {% endblock %}
