@@ -1,28 +1,49 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>HEB Shop (Placeholder)</title>
+    <meta charset="utf-8">
+    <title>HEB Shop (Placeholder)</title>
 </head>
 <body>
-  <header>
+<header>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        <span>{{ message }}</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+{% if current_user.is_anonymous %}
     <h1>HEB Shop</h1>
+        {% else %}
+    <h1>HEB Shop as {{ current_user.get_name() }}</h1>
+        {% endif %}
     <nav>
-      <a href="/">Catalog</a> |
-      <a href="/cart">Cart</a> |
-      <a href="/login">Login</a> |
-      <a href="/signup">Sign Up</a>
+        <a href="/">Catalog</a> |
+        <a href="/cart">Cart</a> |
+        {% if current_user.is_anonymous %}
+            <a href="/login">login</a> |
+            <a href="/signup">Sign Up</a>
+        {% else %}
+            <a href="/logout">logout</a> |
+            <a href="/usersettings">settings</a>
+        {% endif %}
     </nav>
     <hr>
-  </header>
+</header>
 
-  <main>
+<main>
     {% block content %}{% endblock %}
-  </main>
+</main>
 
-  <footer>
+<footer>
     <hr>
     <p>© 2025 HEB Shop (placeholder version)</p>
-  </footer>
+</footer>
 </body>
 </html>
