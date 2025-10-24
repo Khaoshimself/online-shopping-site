@@ -3,8 +3,6 @@ from enum import StrEnum
 
 from bson import ObjectId
 
-
-
 class UserType(StrEnum):
     ADMIN = "admin"
     USER = "user"

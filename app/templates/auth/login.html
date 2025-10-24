@@ -1,16 +1,49 @@
 {% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block page_header %}
+<h1 class="h3 fw-bold">Login</h1>
+{% endblock %}
+
 {% block content %}
-<h2>Login (Placeholder)</h2>
-<form action="" method="post" novalidate>
-    {{ form.hidden_tag() }}
-<p>
-    {{ form.username.label }}<br>
-    {{ form.username(size=32) }}
-</p>
-<p>
-    {{ form.password.label }}<br>
-    {{ form.password(size=32) }}
-</p>
-<p>{{ form.submit() }}</p>
-</form>
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-5">
+    <div class="card shadow border-0">
+      <div class="card-header text-center py-4" style="background:#d9232e;color:#fff;">
+        <h3 class="mb-0 fw-bold">Welcome back</h3>
+        <small class="opacity-75">Log in to your H-E-B account</small>
+      </div>
+
+      <div class="card-body p-4">
+        <form action="" method="post" novalidate>
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form.username.label(class_="form-label fw-semibold") }}
+            {{ form.username(class_="form-control", placeholder="jane_doe") }}
+            {% for err in form.username.errors %}
+              <div class="form-error text-danger small">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.password.label(class_="form-label fw-semibold") }}
+            {{ form.password(class_="form-control", placeholder="Your password") }}
+            {% for err in form.password.errors %}
+              <div class="form-error text-danger small">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="d-grid mt-3">
+            {{ form.submit(class_="btn btn-danger btn-lg") }}
+          </div>
+
+          <p class="text-center mt-3">
+            New user?
+            <a href="{{ url_for('signup') }}" class="text-danger fw-semibold">Create an account</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

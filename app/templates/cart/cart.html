@@ -1,11 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Cart (Placeholder)</h2>
-<table border="1" cellpadding="6">
-  <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>
-  <tr><td>Example Item</td><td>2</td><td>$3.49</td><td>$6.98</td></tr>
-</table>
-<p>Subtotal: $6.98</p>
-<p>Tax (8.25%): $0.58</p>
-<p>Total: $7.56</p>
+<div class="container py-5">
+  <h2 class="mb-4 text-center">Your Shopping Cart</h2>
+
+  <div class="table-responsive shadow-sm rounded">
+    <table class="table align-middle table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th scope="col">Item</th>
+          <th scope="col" class="text-center">Quantity</th>
+          <th scope="col" class="text-end">Price</th>
+          <th scope="col" class="text-end">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong>Example Item</strong><br>
+            <small class="text-muted">SKU: 12345</small>
+          </td>
+          <td class="text-center">
+            <div class="d-flex justify-content-center align-items-center">
+              <button class="btn btn-outline-secondary btn-sm px-2">−</button>
+              <input type="text" class="form-control text-center mx-1" value="2" style="width: 60px;">
+              <button class="btn btn-outline-secondary btn-sm px-2">+</button>
+            </div>
+          </td>
+          <td class="text-end">$3.49</td>
+          <td class="text-end">$6.98</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-6 offset-md-6">
+      <ul class="list-group mb-3">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          Subtotal
+          <span>$6.98</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          Tax (8.25%)
+          <span>$0.58</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center fw-bold">
+          Total
+          <span>$7.56</span>
+        </li>
+      </ul>
+      <div class="d-grid">
+        <button class="btn btn-success btn-lg">Proceed to Checkout</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -1,20 +1,56 @@
 {% extends "base.html" %}
+
+{% block title %}Create your H-E-B account{% endblock %}
+
+{% block head_extra %}
+  {# Only add page-specific <head> stuff here. Core includes stay intact. #}
+  <meta name="robots" content="noindex">
+{% endblock %}
+
+{% block page_header %}
+<h1 class="h3 fw-bold">Create your H-E-B account</h1>
+{% endblock %}
+
 {% block content %}
-<h2>Sign Up (Placeholder)</h2>
-<form action="" method="post" novalidate>
-    {{ form.hidden_tag() }}
-<p>
-    {{ form.username.label }}<br>
-    {{ form.username(size=32) }}
-</p>
-<p>
-    {{ form.password.label }}<br>
-    {{ form.password(size=32) }}
-</p>
-<p>
-    {{ form.verify_password.label }}<br>
-    {{ form.verify_password(size=32) }}
-</p>
-<p>{{ form.submit() }}</p>
-</form>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form.username.label(class_="form-label fw-semibold") }}
+            {{ form.username(class_="form-control", placeholder="jane_doe") }}
+            {% for err in form.username.errors %}
+              <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.password.label(class_="form-label fw-semibold") }}
+            {{ form.password(class_="form-control", placeholder="At least 8 characters") }}
+            {% for err in form.password.errors %}
+              <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-4">
+            {{ form.verify_password.label(class_="form-label fw-semibold") }}
+            {{ form.verify_password(class_="form-control", placeholder="Re-enter password") }}
+            {% for err in form.verify_password.errors %}
+              <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          {{ form.submit(class_="btn btn-danger btn-lg w-100") }}
+        </form>
+
+        <div class="text-center mt-3">
+          <a href="{{ url_for('login') }}">Already have an account? Log in</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
