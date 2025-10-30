@@ -3,62 +3,74 @@ from bson.objectid import ObjectId
 from uuid import uuid4
 from typing import Optional
 
+from pymongo.collection import Collection
 from flask_login import UserMixin
 from argon2 import PasswordHasher
 
-# Import db and optional init helper
-from app.database import db as _db
-try:
-    from app.database import init_db  # if you added it; otherwise ignore
-except Exception:
-    init_db = None  # type: ignore
+# from _ import _ creates a copy of the object, so init_db doesn't work like that
+import app.database
 
 from app.records.usermodel import UserModel, UserType
 
 ph = PasswordHasher()
 
+users: Collection[UserModel]
+
 
 def _get_db():
     "Return usable db or None if Mongo isn't initialized"
     # If you have an init_db() helper and db is None, try to initialize once.
-    if _db is None and init_db:
+    if app.database.db is None and app.database.init_db:
         try:
-            init_db()
+            app.database.init_db()
         except Exception:
             pass
-    return _db
+    return app.database.db
+
+
+def get_users() -> Optional[Collection[UserModel]]:
+    if _get_db() is None:
+        return None
+    users = app.database.db["users"]
+    return users
 
 
 def db_user_create(name: str, password: str) -> Optional[ObjectId]:
-    d = _get_db()
-    if d is None:
-        # DB not available; skip silently or raise RuntimeError
+
+    u = get_users()
+    if u is None:
         return None
-    if d.users.find_one({"name": name}) is not None:
+
+    if u.find_one({"name": name}) is not None:
+        print(f"user {name} exists")
         return None
-    pw_hash = ph.hash(password)
-    user = UserModel(
-        name=name,
-        password_hash=pw_hash,
-        permissions=UserType.USER,
-        activated=True,
-        cart=[],
-    )
-    resp = d.users.insert_one(user)
-    return resp.inserted_id
+    try:
+        pw_hash = ph.hash(password)
+        user = UserModel(
+            name=name,
+            password_hash=pw_hash,
+            permissions=UserType.USER,
+            activated=True,
+            cart=[],
+        )
+        resp = u.insert_one(user)
+        return resp.inserted_id
+    except Exception as e:
+        print(e)
+        return None
 
 
 def seed_admin() -> None:
     """Call this only when Mongo is running (e.g., a one-time CLI/route)."""
-    d = _get_db()
-    if d is None:
+    u = get_users()
+    if u is None:
         print("DB not available; skip admin seed.")
         return
-    doc = d.users.find_one({"name": "admin"})
+    doc = u.find_one({"name": "admin"})
     if doc is None:
         _id = db_user_create("admin", "admin")
         if _id:
-            d.users.update_one(
+            u.update_one(
                 {"_id": _id},
                 {"$set": {"permissions": UserType.ADMIN}},
             )
@@ -96,11 +108,11 @@ class User(UserMixin):
         return self.model["cart"]
 
     def new_auth_token(self) -> Optional[str]:
-        d = _get_db()
-        if d is None:
+        u = get_users()
+        if u is None:
             return None
         token = "auth_" + str(uuid4())
-        d.users.update_one({"_id": self.model["_id"]}, {"$set": {"auth_token": token}})
+        u.update_one({"_id": self.model["_id"]}, {"$set": {"auth_token": token}})
         return token
 
     def check_password(self, password: str) -> bool:
@@ -110,32 +122,36 @@ class User(UserMixin):
             return False
 
     def update_password(self, password: str) -> None:
-        d = _get_db()
-        if d is None:
-            return
-        d.users.update_one(
+        u = get_users()
+        if u is None:
+            return None
+
+        u.update_one(
             {"_id": self.model["_id"]},
             {"$set": {"password_hash": ph.hash(password)}},
         )
 
     def update_username(self, username: str) -> None:
-        d = _get_db()
-        if d is None:
-            return
-        d.users.update_one({"_id": self.model["_id"]}, {"$set": {"name": username}})
+        u = get_users()
+        if u is None:
+            return None
+
+        u.update_one({"_id": self.model["_id"]}, {"$set": {"name": username}})
 
     def delete_user(self) -> None:
-        d = _get_db()
-        if d is None:
-            return
-        d.users.delete_one({"_id": self.model["_id"]})
+        u = get_users()
+        if u is None:
+            return None
+
+        u.delete_one({"_id": self.model["_id"]})
 
 
 def db_user_verify_login(name: str, password: str) -> Optional[User]:
-    d = _get_db()
-    if d is None:
+    u = get_users()
+    if u is None:
         return None
-    user = d.users.find_one({"name": name})
+
+    user = u.find_one({"name": name})
     if user is not None:
         try:
             if ph.verify(user["password_hash"], password):
@@ -145,6 +161,7 @@ def db_user_verify_login(name: str, password: str) -> Optional[User]:
         except argon2.exceptions.VerificationError:
             return None
     return None
+
 
 # Was getting DB issues so I commented it out
 """

@@ -3,6 +3,7 @@ from enum import StrEnum
 
 from bson import ObjectId
 
+
 class UserType(StrEnum):
     ADMIN = "admin"
     USER = "user"
@@ -17,7 +18,8 @@ class CartItem(TypedDict):
 
 class UserModel(TypedDict):
     """Class for users in the database"""
-    _id : ObjectId
+
+    _id: ObjectId
     name: str
     password_hash: str
     permissions: UserType

@@ -5,6 +5,7 @@ This project is a **Flask web app** that simulates a basic H-E-B–style online 
 Right now, it’s in **Phase 2** of development: placeholder templates to show the structure and page flow.  
 Later phases will add CSS styling, JavaScript interactions, and a MongoDB backend.
 
+Please use [Black](https://github.com/psf/black) to format python files
 ---
 
 ## 📂 Project Structure
