@@ -6,10 +6,10 @@ except Exception:
     MongoClient = None  # pymongo not installed yet or not needed
 
 MONGO_URI = (
-    f"mongodb://{os.environ.get("CONFIG_MONGODB_USERNAME","devroot")}:"
-    f"{os.environ.get("CONFIG_MONGODB_PASSWORD","devroot")}@"
-    f"{os.environ.get("CONFIG_MONGODB_IP","127.0.0.1")}:"
-    f"{os.environ.get("CONFIG_MONGODB_PORT","27017")}"
+    f"mongodb://{os.environ.get('CONFIG_MONGODB_USERNAME','devroot')}:"
+    f"{os.environ.get('CONFIG_MONGODB_PASSWORD','devroot')}@"
+    f"{os.environ.get('CONFIG_MONGODB_IP','127.0.0.1')}:"
+    f"{os.environ.get('CONFIG_MONGODB_PORT','27017')}"
 )
 db = None  # stays None until we init (or if Mongo isn't running)
 
