@@ -26,3 +26,30 @@ class UserModel(TypedDict):
     activated: bool
     auth_token: str
     cart: List[CartItem]
+
+class ItemCategory(StrEnum):
+    PRODUCE = "produce"
+    DAIRY = "dairy"
+    BAKERY = "bakery"
+    FROZEN = "frozen"
+    PANTRY = "pantry"
+    DELI = "deli"
+    MEAT = "meat"
+    SEAFOOD = "seafood"
+    DRUGSTORE = "drugstore"
+    OTHER = "other"
+
+class ItemModel(TypedDict, total=False):
+    """Grocery store item stored in the DB. price is stored in cents to avoid floats."""
+    _id: ObjectId
+    name: str
+    description: str
+    price_cents: int
+    category: ItemCategory
+    stock: int
+    image_urls: List[str]
+    tags: List[str]
+    #on_sale: bool
+    #sale_price_cents: int 
+    #created_at: datetime
+    #updated_at: datetime # maybe implement these later
