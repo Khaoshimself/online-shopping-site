@@ -10,10 +10,13 @@ class UserType(StrEnum):
 
 
 class CartItem(TypedDict):
-    """Reference Items with a quantity"""
-
+    """Reference Items with a quantity (stored in DB)."""
     item_id: ObjectId
     quantity: int
+
+# separate version including full item details (uses ItemModel)
+class CartItemFull(CartItem, total=False):
+    item: "ItemModel"
 
 
 class UserModel(TypedDict):
