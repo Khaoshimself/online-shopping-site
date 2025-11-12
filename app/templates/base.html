@@ -18,7 +18,7 @@
     >
 
     <!-- Main CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
     {% block head %}{% endblock %}
   </head>
@@ -27,10 +27,11 @@
     <!-- Navbar -->
     <header>
       {% block navbar %}
-      <nav class="navbar navbar-expand-lg border-bottom"
-        style="background:#d9232e;color:#fff;">
+      <nav class="navbar navbar-expand-lg border-bottom sticky-top"
+        style="background:#d9232e;color:#fff;" data-bs-theme="dark">
+        
       <div class="container">
-        <a class="navbar-brand fw-bold text-white" href="/index">
+        <a class="navbar-brand fw-bold text-white" href="{{ url_for('catalog') }}">
           H-E-B
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -40,9 +41,36 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link text-white" href="/index">Home</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/cart">Shop</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="/login">Login</a></li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('catalog') }}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white position-relative" href="{{ url_for('cart') }}">
+                Cart
+                <!-- This is the JS Hook for the cart count -->
+                <span 
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark d-none" 
+                  id="cart-count">
+                  0
+                </span>
+              </a>
+            </li>    
+            
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('user_settings') }}">My Account</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('logout') }}">Logout</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('login') }}">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ url_for('signup') }}">Sign Up</a>
+            </li>
+          {% endif %}
           </ul>
         </div>
       </div>
@@ -65,6 +93,21 @@
         {% block content %}{% endblock %}
       </div>
     </main>
+
+<!-- --- ADD TOAST NOTIFICATION ELEMENT --- -->
+    <!-- This is the popup your cart.js will use -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+          <strong class="me-auto">Success</strong>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          Item added to cart!
+        </div>
+      </div>
+    </div>
+    <!-- --- END OF CHANGE --- -->
 
     <!-- Footer according to the real one -->
     <footer class="bg-dark text-light mt-auto pt-5 pb-4">
@@ -143,6 +186,8 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/cart.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
