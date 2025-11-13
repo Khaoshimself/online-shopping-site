@@ -35,6 +35,43 @@ def init_db() -> bool:
         print(e)
         return False
 
+# this function creates a new mongoDB item
+# it follows the ItemModel structure from usermodel.py
+def create_item(_id, name, description, price_cents, category, stock, image_urls, tags) -> bool:
+    """Create a new item in the database. Returns True if successful."""
+    
+    if db is None:
+        print("Database not initialized")
+        return False
+    try:
+        item = {
+            "_id": _id,
+            "name": name,
+            "description": description,
+            "price_cents": price_cents,
+            "category": category,
+            "stock": stock,
+            "image_urls": image_urls,
+            "tags": tags
+        }
+        db["items"].insert_one(item)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+    # end of create_item
+    
+   
+    # the fields are:
+    # _id: ObjectId
+    # name: str
+    # description: str
+    # price_cents: int
+    # category: ItemCategory
+    # stock: int
+    # image_urls: List[str]
+    # tags: List[str]
+    return False
 
 """
 from bson import ObjectId
