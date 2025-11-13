@@ -37,7 +37,7 @@ def init_db() -> bool:
 
 # this function creates a new mongoDB item
 # it follows the ItemModel structure from usermodel.py
-def create_item(_id, name, description, price_cents, category, stock, image_urls, tags) -> bool:
+def create_item(name, description, price_cents, category, stock, image_urls, tags) -> bool:
     """Create a new item in the database. Returns True if successful."""
     # the fields are:
     # _id: ObjectId
@@ -53,7 +53,7 @@ def create_item(_id, name, description, price_cents, category, stock, image_urls
         return False
     try:
         item = {
-            "_id": _id,
+            "_id": None,  # MongoDB will create this automatically
             "name": name,
             "description": description,
             "price_cents": price_cents,
