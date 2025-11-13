@@ -39,7 +39,15 @@ def init_db() -> bool:
 # it follows the ItemModel structure from usermodel.py
 def create_item(_id, name, description, price_cents, category, stock, image_urls, tags) -> bool:
     """Create a new item in the database. Returns True if successful."""
-    
+    # the fields are:
+    # _id: ObjectId
+    # name: str
+    # description: str
+    # price_cents: int
+    # category: ItemCategory
+    # stock: int
+    # image_urls: List[str]
+    # tags: List[str]
     if db is None:
         print("Database not initialized")
         return False
@@ -62,15 +70,7 @@ def create_item(_id, name, description, price_cents, category, stock, image_urls
     # end of create_item
     
    
-    # the fields are:
-    # _id: ObjectId
-    # name: str
-    # description: str
-    # price_cents: int
-    # category: ItemCategory
-    # stock: int
-    # image_urls: List[str]
-    # tags: List[str]
+    
     return False
 
 """
