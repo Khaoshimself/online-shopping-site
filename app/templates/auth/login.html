@@ -14,9 +14,15 @@
       </div>
 
       <div class="card-body p-4">
-        <form action="" method="post" novalidate>
+        <form action="" method="post" novalidate id="login-form">
           {{ form.hidden_tag() }}
 
+          <!-- 
+            This is the JS Hook for showing success/error messages.
+            auth.js will find this div by its ID.
+          -->
+          <div id="auth-message" class="alert d-none" role="alert"></div>          
+          
           <div class="mb-3">
             {{ form.username.label(class_="form-label fw-semibold") }}
             {{ form.username(class_="form-control", placeholder="jane_doe") }}

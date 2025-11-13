@@ -5,7 +5,7 @@
 
   <div class="table-responsive shadow-sm rounded">
     <table class="table align-middle table-striped">
-      <thead class="table-dark">
+      <thead class="table-dark" id="cart-thead">
         <tr>
           <th scope="col">Item</th>
           <th scope="col" class="text-center">Quantity</th>
@@ -13,8 +13,8 @@
           <th scope="col" class="text-end">Total</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
+      <tbody id="cart-tbody">
+        <!-- <tr>
           <td>
             <strong>Example Item</strong><br>
             <small class="text-muted">SKU: 12345</small>
@@ -28,7 +28,7 @@
           </td>
           <td class="text-end">$3.49</td>
           <td class="text-end">$6.98</td>
-        </tr>
+        </tr> -->
       </tbody>
     </table>
   </div>
@@ -38,15 +38,15 @@
       <ul class="list-group mb-3">
         <li class="list-group-item d-flex justify-content-between align-items-center">
           Subtotal
-          <span>$6.98</span>
+          <span id="cart-subtotal">$0.00</span>
         </li>
         <li class="list-group-item d-flex justify-content-between align-items-center">
           Tax (8.25%)
-          <span>$0.58</span>
+          <span id="cart-tax">$0.00</span>
         </li>
         <li class="list-group-item d-flex justify-content-between align-items-center fw-bold">
           Total
-          <span>$7.56</span>
+          <span id="cart-total">$0.00</span>
         </li>
       </ul>
       <div class="d-grid">
