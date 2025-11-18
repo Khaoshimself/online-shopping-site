@@ -68,9 +68,6 @@ def create_item(name, description, price_cents, category, stock, image_urls, tag
         print(e)
         return False
     # end of create_item
-    
-   
-    
     return False
 
 """
