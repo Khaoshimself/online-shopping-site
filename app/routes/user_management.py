@@ -114,8 +114,6 @@ def init_user_management(app: Flask, login_manager: LoginManager):
                 # --- THIS IS THE NEW JSON "BRIDGE" ---
                 # Check if the request is from our auth.js script
                 if request.is_json:
-                    # Clear session cart if it exists (new login)
-                    session.pop("cart", None) 
                     return jsonify({
                         "message": "Login successful! Redirecting...",
                         "redirect": url_for("catalog") # Tell JS to go to the shop
@@ -245,13 +243,14 @@ def init_user_management(app: Flask, login_manager: LoginManager):
         if user_id == "1":
             return DummyUser()
 
-        try: 
-            model = db.users.find_one({"_id": ObjectId(user_id)})
+        try:
+            import app.database
+            model = app.database.db.users.find_one({"_id": ObjectId(user_id)})
             if model is None:
                 return None
             return User(model)
         except:
-            None
+            return None
 
     @login_manager.request_loader
     def load_user_from_request(req) -> Optional[User]:
