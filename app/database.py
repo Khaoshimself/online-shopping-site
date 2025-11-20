@@ -53,7 +53,7 @@ def create_item(name, description, price_cents, category, stock, image_urls, tag
         return False
     try:
         item = {
-            "_id": None,  # MongoDB will create this automatically
+            # "_id": None,  # MongoDB will create this automatically
             "name": name,
             "description": description,
             "price_cents": price_cents,
