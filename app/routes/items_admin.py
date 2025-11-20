@@ -11,7 +11,7 @@ items_bp = Blueprint("items", __name__, url_prefix="/admin/items")
 def ensure_db():
     init_db()
 
-@items_bp.route("/", methods=["POST"])
+@items_bp.route("/add", methods=["POST"])
 @login_required
 def add_item():
     if not app.database.init_db():
