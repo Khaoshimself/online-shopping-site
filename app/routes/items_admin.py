@@ -15,9 +15,9 @@ def add_item():
         category = ItemCategory(payload.get("category"))
         success = create_item(
             name = payload["name"],
-            description = payload.get("description","")
+            description = payload.get("description",""),
             price_cents = int(payload["price_cents"]),
-            category = category
+            category = category,
             stock = int(payload.get("stock", 0)),
             image_urls = payload.get("image_urls", []),
             tags = payload.get("tags", [])
