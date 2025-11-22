@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 import app.database
 from app.database import create_item, init_db
 from app.records.usermodel import ItemCategory
@@ -32,6 +32,18 @@ def add_item():
             image_urls = payload.get("image_urls", []),
             tags = payload.get("tags", [])
         )
-        return jsonify({"success": success}), (201 if success else 400)
+        return jsonify({"success": True, "inserted_id": str(success)}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    
+
+@items_bp.route("/", methods=["GET"])
+@login_required
+def admin_items_page():
+    # ensure DB is ready (optional)
+    if not app.database.init_db():
+        return "Internal error", 500
+    # check admin
+    if not (isinstance(current_user, User) and current_user.get_permissions() == UserType.ADMIN):
+        return "Access denied", 403
+    return render_template("admin/items.html", title="Admin — Items")
