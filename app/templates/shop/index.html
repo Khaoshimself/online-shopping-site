@@ -4,57 +4,25 @@
   <h2 class="text-center mb-5">Our Products</h2>
 
   <div class="row g-4">
-    <div class="col-sm-6 col-md-4 col-lg-3">
-      <div class="card h-100 shadow-sm">
-        <img src="{{ url_for('static', filename='images/sample1.jpg') }}" class="card-img-top" alt="Product 1">
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">Organic Honey</h5>
-          <p class="card-text text-muted mb-2">Pure, locally sourced honey.</p>
-          <div class="mt-auto d-flex justify-content-between align-items-center">
-            <span class="fw-bold">$9.99</span>
-            <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="prod_101">Add to Cart</button>          </div>
+    {% if items %}
+      {% for item in items %}
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm">
+          <img src="{{ item.image_urls[0] if item.image_urls else url_for('static', filename='images/sample1.jpg') }}" class="card-img-top" alt="{{ item.name }}">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ item.name }}</h5>
+            <p class="card-text text-muted mb-2">{{ item.description }}</p>
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <span class="fw-bold">${{ '%.2f' | format(item.price_cents / 100) }}</span>
+              <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ item._id }}">Add to Cart</button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="col-sm-6 col-md-4 col-lg-3">
-      <div class="card h-100 shadow-sm">
-        <img src="{{ url_for('static', filename='images/sample2.jpg') }}" class="card-img-top" alt="Product 2">
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">Artisan Bread</h5>
-          <p class="card-text text-muted mb-2">Freshly baked sourdough loaf.</p>
-          <div class="mt-auto d-flex justify-content-between align-items-center">
-            <span class="fw-bold">$4.49</span>
-            <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="prod_102">Add to Cart</button>          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-sm-6 col-md-4 col-lg-3">
-      <div class="card h-100 shadow-sm">
-        <img src="{{ url_for('static', filename='images/sample3.jpg') }}" class="card-img-top" alt="Product 3">
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">Texas Olive Oil</h5>
-          <p class="card-text text-muted mb-2">Cold-pressed and rich in flavor.</p>
-          <div class="mt-auto d-flex justify-content-between align-items-center">
-            <span class="fw-bold">$14.99</span>
-            <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="prod_103">Add to Cart</button>          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-sm-6 col-md-4 col-lg-3">
-      <div class="card h-100 shadow-sm">
-        <img src="{{ url_for('static', filename='images/sample4.jpg') }}" class="card-img-top" alt="Product 4">
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">HEB Ground Coffee</h5>
-          <p class="card-text text-muted mb-2">Medium roast, 12oz bag.</p>
-          <div class="mt-auto d-flex justify-content-between align-items-center">
-            <span class="fw-bold">$7.49</span>
-            <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="prod_104">Add to Cart</button>          </div>
-        </div>
-      </div>
-    </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-center text-muted">No items available.</p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
