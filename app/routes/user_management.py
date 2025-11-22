@@ -74,12 +74,68 @@ def init_user_management(app: Flask, login_manager: LoginManager):
             print("DummyUser: User deleted (not really)")
             pass
 
-    # Add main page routes (moved form __init__.py)
+
+    # MONGO STUFF
+    from pymongo import MongoClient
+    from dotenv import load_dotenv
+    import os
+
+    load_dotenv()
+
+    mongo_user = os.getenv("MONGO_ROOT_USER")
+    mongo_password = os.getenv("MONGO_ROOT_PASSWORD")
+
+    client = MongoClient(
+        f"mongodb://{mongo_user}:{mongo_password}@mongo:27017/?authSource=admin"
+    )
+    db = client["shop"]
+    products_col = db["products"]
+    orders_col = db["orders"]
+
     @app.route("/")
     @app.route("/index")
     def catalog():
-        """Main product catalog/shop page."""
-        return render_template("shop/index.html", title="Shop")
+        """Main product catalog/shop page with search + sorting."""
+        q = request.args.get("q", "").strip()
+        sort = request.args.get("sort", "name")  
+
+    # Serch query
+        mongo_query = {}
+        if q:
+            mongo_query = {
+                "$or": [
+                    {"name": {"$regex": q, "$options": "i"}},
+                    {"description": {"$regex": q, "$options": "i"}},
+                ]
+            }
+
+    # Determining the sorting order
+        if sort == "price_asc":
+            sort_field = "price"
+            sort_dir = 1       # low → high
+
+        elif sort == "price_desc":
+            sort_field = "price"
+            sort_dir = -1      # high → low
+
+        elif sort == "availability":
+            sort_field = "quantity"
+            sort_dir = -1      # most available first
+
+        else:
+            sort_field = "name"
+            sort_dir = 1       # A → Z         
+
+        cursor = products_col.find(mongo_query).sort(sort_field, sort_dir)
+        products = list(cursor)
+
+        return render_template(
+            "shop/index.html",
+            title="Shop",
+            products=products,
+            q=q,
+            sort=sort,  
+        )
 
     @app.route("/cart")
     def cart():
@@ -274,3 +330,16 @@ def init_user_management(app: Flask, login_manager: LoginManager):
                 return User(user)
 
         return None
+
+    @app.route("/orders/<order_id>")
+    def order_confirmation(order_id):
+        try:
+            obj_id = ObjectId(order_id)
+        except Exception:
+            abort(404)
+
+        order = orders_col.find_one({"_id": obj_id})
+        if not order:
+            abort(404)
+
+        return render_template("order_confirmation.html", order=order, order_id=order_id)
