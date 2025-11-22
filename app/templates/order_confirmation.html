@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="card-title mb-3">Order Confirmation</h2>
+          <p class="text-muted mb-1">Thank you for your order!</p>
+          <p class="mb-4">
+            <strong>Order ID:</strong>
+            <span class="text-monospace">{{ order_id }}</span><br>
+            <strong>Status:</strong> {{ order.status|capitalize }}
+          </p>
+
+          <h5 class="mb-3">Items</h5>
+          <div class="table-responsive mb-4">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="text-center">Qty</th>
+                  <th class="text-end">Price</th>
+                  <th class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order["items"] %}
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        {% if item.image_url %}
+                          <img src="{{ item.image_url }}" alt="{{ item.name }}" class="img-thumbnail me-3" style="width: 50px;">
+                        {% endif %}
+                        <div>
+                          <strong>{{ item.name }}</strong><br>
+                          <small class="text-muted">SKU: {{ item.product_id }}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-end">
+                      ${{ '%.2f'|format(item.price_cents / 100) }}
+                    </td>
+                    <td class="text-end fw-semibold">
+                      ${{ '%.2f'|format(item.total_price_cents / 100) }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <h5 class="mb-3">Order Summary</h5>
+          <ul class="list-group mb-4">
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Subtotal</span>
+              <span>${{ '%.2f'|format(order.subtotal_cents / 100) }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Discount{% if order.discount_code %} ({{ order.discount_code }}){% endif %}</span>
+              <span>- ${{ '%.2f'|format((order.discount_cents or 0) / 100) }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Tax</span>
+              <span>${{ '%.2f'|format(order.tax_cents / 100) }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between fw-bold">
+              <span>Total</span>
+              <span>${{ '%.2f'|format(order.total_cents / 100) }}</span>
+            </li>
+          </ul>
+
+          <div class="d-flex justify-content-between">
+            <a href="{{ url_for('catalog') }}" class="btn btn-outline-secondary">
+              Continue Shopping
+            </a>
+            <button class="btn btn-primary" disabled>
+              Payment Coming Soon
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

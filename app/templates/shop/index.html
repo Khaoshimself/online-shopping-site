@@ -2,27 +2,73 @@
 {% block content %}
 <div class="container py-5">
   <h2 class="text-center mb-5">Our Products</h2>
-
+  <form method="get" class="row mb-4 justify-content-center">
+    <div class="col-md-5 mb-2 mb-md-0">
+      <div class="input-group">
+        <input
+          type="text"
+          name="q"
+          class="form-control"
+          placeholder="Search products by name or description..."
+          value="{{ q or '' }}"
+        >
+      </div>
+    </div>
+  
+    <div class="col-md-3 mb-2 mb-md-0">
+      <select name="sort" class="form-select">
+        <option value="name" {% if sort == 'name' %}selected{% endif %}>
+          Sort by Item/Description
+        </option>
+      
+        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>
+          Price: Low → High
+        </option>
+      
+        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>
+          Price: High → Low
+        </option>
+      
+        <option value="availability" {% if sort == 'availability' %}selected{% endif %}>
+          Sort by Availability
+        </option>
+      </select>      
+    </div>
+  
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-primary" type="submit">
+        Apply
+      </button>
+    </div>
+  </form>
+  
   <div class="row g-4">
-    {% if items %}
-      {% for item in items %}
+    {% for product in products %}
       <div class="col-sm-6 col-md-4 col-lg-3">
         <div class="card h-100 shadow-sm">
-          <img src="{{ item.image_urls[0] if item.image_urls else url_for('static', filename='images/sample1.jpg') }}" class="card-img-top" alt="{{ item.name }}">
+          <img
+            src="{{ url_for('static', filename=product.image_path) }}"
+            class="card-img-top"
+            alt="{{ product.name }}"
+          >
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title">{{ item.name }}</h5>
-            <p class="card-text text-muted mb-2">{{ item.description }}</p>
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text text-muted mb-2">{{ product.description }}</p>
             <div class="mt-auto d-flex justify-content-between align-items-center">
-              <span class="fw-bold">${{ '%.2f' | format(item.price_cents / 100) }}</span>
-              <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ item._id }}">Add to Cart</button>
+              <span class="fw-bold">${{ '%.2f'|format(product.price) }}</span>
+              <button
+                class="btn btn-primary btn-sm add-to-cart-btn"
+                data-product-id="{{ product._id }}"
+              >
+                Add to Cart
+              </button>
             </div>
           </div>
         </div>
       </div>
-      {% endfor %}
     {% else %}
-      <p class="text-center text-muted">No items available.</p>
-    {% endif %}
+      <p class="text-muted text-center">No products available.</p>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}
