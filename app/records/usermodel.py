@@ -11,8 +11,10 @@ class UserType(StrEnum):
 
 class CartItem(TypedDict):
     """Reference Items with a quantity (stored in DB)."""
+
     item_id: ObjectId
     quantity: int
+
 
 # separate version including full item details (uses ItemModel)
 class CartItemFull(CartItem, total=False):
@@ -30,6 +32,7 @@ class UserModel(TypedDict):
     auth_token: str
     cart: List[CartItem]
 
+
 class ItemCategory(StrEnum):
     PRODUCE = "produce"
     DAIRY = "dairy"
@@ -42,8 +45,10 @@ class ItemCategory(StrEnum):
     DRUGSTORE = "drugstore"
     OTHER = "other"
 
+
 class ItemModel(TypedDict, total=False):
     """Grocery store item stored in the DB. price is stored in cents to avoid floats."""
+
     _id: ObjectId
     name: str
     description: str
@@ -52,7 +57,8 @@ class ItemModel(TypedDict, total=False):
     stock: int
     image_urls: List[str]
     tags: List[str]
-    #on_sale: bool
-    #sale_price_cents: int 
-    #created_at: datetime
-    #updated_at: datetime # maybe implement these later
+    # on_sale: bool
+    # sale_price_cents: int
+    # created_at: datetime
+    # updated_at: datetime # maybe implement these later
+

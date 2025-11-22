@@ -1,7 +1,7 @@
 import argon2
 from bson.objectid import ObjectId
 from uuid import uuid4
-from typing import Optional
+from typing import Optional, List
 
 from pymongo.collection import Collection
 from flask_login import UserMixin
@@ -10,7 +10,7 @@ from argon2 import PasswordHasher
 # from _ import _ creates a copy of the object, so init_db doesn't work like that
 import app.database
 
-from app.records.usermodel import UserModel, UserType
+from app.records.usermodel import UserModel, UserType, CartItem
 
 ph = PasswordHasher()
 
@@ -101,11 +101,17 @@ class User(UserMixin):
     def get_name(self) -> str:
         return self.model["name"]
 
-    def get_permissions(self):
+    def get_permissions(self) -> UserType:
         return self.model["permissions"]
 
-    def get_cart(self):
+    def get_cart(self) -> List[CartItem]:
         return self.model["cart"]
+    def update_cart(self,new_cart: List[CartItem] ) -> bool:
+        u = get_users()
+        if u is None:
+            return False
+        u.update_one({"_id":self.model["_id"]}, {"$set": {"cart": new_cart}})
+        return True
 
     def new_auth_token(self) -> Optional[str]:
         u = get_users()

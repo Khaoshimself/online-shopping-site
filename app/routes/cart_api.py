@@ -12,122 +12,171 @@ with real MongoDB calls, and your JS will keep working.
 
 from flask import Blueprint, jsonify, request, session
 import time
-
-# A mock database of products for our cart to use
-# This mimics what will be in MongoDB
-MOCK_PRODUCTS = {
-    # We will add these IDs to your index.html buttons
-    "prod_101": {"name": "Organic Honey", "price_cents": 999, "image_url": "https://placehold.co/60x60/EFEFEF/333333?text=Honey"},
-    "prod_102": {"name": "Artisan Bread", "price_cents": 449, "image_url": "https://placehold.co/60x60/EFEFEF/333333?text=Bread"},
-    "prod_103": {"name": "Texas Olive Oil", "price_cents": 1499, "image_url": "https://placehold.co/60x60/EFEFEF/333333?text=Oil"},
-    "prod_104": {"name": "HEB Ground Coffee", "price_cents": 749, "image_url": "https://placehold.co/60x60/EFEFEF/333333?text=Coffee"},
-}
+from app.records.usermodel import ItemModel, CartItem, CartItemFull
+from app.records.users import User
+import app.database
+from flask_login import current_user, login_required, login_user
+from bson import ObjectId
+from math import ceil
+from typing import List, Dict
 
 cart_api_bp = Blueprint("cart_api", __name__, url_prefix="/api/cart")
 
-def _get_cart_data():
+
+def _get_cart_data(user):
     """Internal helper function to calculate cart totals."""
     # Get the cart from the session, default to an empty dict
-    cart_items = session.get("cart", {})  
-    
+    if not isinstance(user, User) or not app.database.init_db():
+        return {
+            "items": [],
+            "item_count": 0,
+            "subtotal_cents": 0,
+            "tax_cents": 0,
+            "total_cents": 0,
+        }
+    cart: List[CartItem] = user.get_cart()
+
+    items = app.database.db["items"]
+    cart_ids: List[ObjectId] = [cart_item["item_id"] for cart_item in cart]
+    cart_items_raw: List[ItemModel] = items.find({"_id": {"$in": cart_ids}})
+    item_lookup: Dict[ObjectId, ItemModel] = {items["_id"]: item for item in cart_items_raw}
+    cart_items: List[CartItemFull] = [
+        {
+            'item_id': cart_item['item_id'],
+            'quantity': cart_item['quantity'],
+            'item': item_lookup[cart_item['item_id']]
+        }
+        for cart_item in cart
+    ]
+    # cart_items = session.get("cart", {})
+
     line_items = []
     subtotal_cents = 0
     item_count = 0
-    
-    for product_id, quantity in cart_items.items():
-        product_info = MOCK_PRODUCTS.get(product_id)
-        if product_info:
-            total_price = product_info["price_cents"] * quantity
-            subtotal_cents += total_price
-            item_count += quantity
-            line_items.append({
-                "product_id": product_id,
-                "name": product_info["name"],
-                "price_cents": product_info["price_cents"],
-                "image_url": product_info["image_url"],
-                "quantity": quantity,
-                "total_price_cents": total_price
-            })
-            
+
+    for cart_item in cart_items:
+        total_price = cart_item['item']['price_cents'] * cart_item['quantity']
+        subtotal_cents += total_price
+        item_count += cart_item['quantity']
+        line_items.append(
+            {
+                "product_id": cart_item['item_id'],
+                "name": cart_item['item']["name"],
+                "price_cents": cart_item['item']["price_cents"],
+                "image_url": cart_item['item']["image_urls"],
+                "quantity": cart_item['quantity'],
+                "total_price_cents": total_price,
+            }
+        )
+
     # Calculate tax (e.g., 8.25%)
-    tax_cents = round(subtotal_cents * 0.0825)
+    # tax should be ceil
+    tax_cents = ceil(subtotal_cents * 0.0825)
     total_cents = subtotal_cents + tax_cents
-    
+
     return {
         "items": line_items,
         "item_count": item_count,
         "subtotal_cents": subtotal_cents,
         "tax_cents": tax_cents,
-        "total_cents": total_cents
+        "total_cents": total_cents,
     }
 
 
 @cart_api_bp.route("", methods=["GET"])
+@login_required
 def get_cart():
     """
     Get the current user's cart from the session.
     This is called by cart.js when you load the cart page.
     """
-    return jsonify(_get_cart_data())
+    return jsonify(_get_cart_data(current_user))
 
 
 @cart_api_bp.route("/add", methods=["POST"])
+@login_required
 def add_to_cart():
     """
     Add an item to the cart in the session.
     This is called by cart.js when you click "Add to Cart".
     """
+    if not app.database.init_db():
+        return jsonify({"message": "Internal error"}), 500
+
     data = request.get_json()
     product_id = data.get("product_id")
     quantity = int(data.get("quantity", 1))
 
-    if not product_id or product_id not in MOCK_PRODUCTS:
+    items = app.database.db["items"]
+    product = items.find_one({'_id': product_id})
+    if not product_id or not product:
         return jsonify({"message": "Invalid product."}), 400
 
-    # Simulate network delay so the loading spinner is visible
-    time.sleep(0.3)
-
     # Get cart from session, modify it, and save it back
-    cart = session.get("cart", {})
-    cart[product_id] = cart.get(product_id, 0) + quantity
-    session["cart"] = cart # This saves it to the user's cookie
-    
-    cart_data = _get_cart_data()
-    return jsonify({
-        "message": f"Added {MOCK_PRODUCTS[product_id]['name']} to cart!",
-        "cart_item_count": cart_data["item_count"]
-    }), 200
+    cart = current_user.get_cart()
+    for cart_item in cart:
+        if cart_item["product_id"] == product_id:
+            cart_item["quantity"] += quantity
+            break
+    else:
+        cart.append({"product_id": product_id, "quantity": quantity})
+
+    current_user.update_cart(cart)
+
+
+    cart_data = _get_cart_data(current_user)
+    return (
+        jsonify(
+            {
+                "message": f"Added {product['name']} to cart!",
+                "cart_item_count": cart_data["item_count"],
+            }
+        ),
+        200,
+    )
+
 
 @cart_api_bp.route("/update", methods=["POST"])
 def update_cart_item():
     """Update an item's quantity in the session cart."""
+    if not app.database.init_db():
+        return jsonify({"message": "Internal error"}), 500
     data = request.get_json()
     product_id = data.get("product_id")
     quantity = int(data.get("quantity", 1))
 
-    if not product_id or product_id not in MOCK_PRODUCTS:
+    items = app.database.db["items"]
+    product = items.find_one({'_id': product_id})
+    if not product_id or product:
         return jsonify({"message": "Invalid product."}), 400
 
-    cart = session.get("cart", {})
-    if quantity > 0:
-        cart[product_id] = quantity
+    cart = current_user.get_cart()
+    if quantity > 1:
+        for cart_item in cart:
+            if cart_item["product_id"] == product_id:
+                cart_item["quantity"] = quantity
+                break
+        else:
+            cart.append({"product_id": product_id, "quantity": quantity})
     else:
-        # Remove if quantity is 0 or less
-        cart.pop(product_id, None) 
-    
-    session["cart"] = cart
-    
-    return jsonify(_get_cart_data()), 200
+        cart = list( filter(lambda item: item["product_id"] != product_id, cart) )
+    current_user.update_cart(cart)
+
+    return jsonify(_get_cart_data(current_user)), 200
 
 
 @cart_api_bp.route("/remove", methods=["POST"])
 def remove_cart_item():
     """Remove an item from the session cart."""
+    if not app.database.init_db():
+        return jsonify({"message": "Internal error"}), 500
     data = request.get_json()
     product_id = data.get("product_id")
 
-    cart = session.get("cart", {})
-    cart.pop(product_id, None) # Safely remove the item
-    session["cart"] = cart
-    
-    return jsonify(_get_cart_data()), 200
+    cart = current_user.get_cart()
+
+    cart = list( filter(lambda item: item["product_id"] != product_id, cart) )
+
+    current_user.update_cart(cart)
+
+    return jsonify(_get_cart_data(current_user)), 200
