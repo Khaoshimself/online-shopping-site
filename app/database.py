@@ -2,8 +2,10 @@ import os
 
 try:
     from pymongo import MongoClient
+    from bson import ObjectId
 except Exception:
     MongoClient = None  # pymongo not installed yet or not needed
+    ObjectId = None
 
 MONGO_URI = (
     f"mongodb://{os.environ.get('CONFIG_MONGODB_USERNAME','devroot')}:"
@@ -35,10 +37,27 @@ def init_db() -> bool:
         print(e)
         return False
 
+
+def get_items(limit: int = 100):
+    """Return list of items from the database (as dictionaries)."""
+    if db is None:
+        return [] # return nothing if db isn't initialized
+    try:
+        cursor = db["items"].find().limit(limit)
+        items = []
+        for doc in cursor:
+            doc["_id"] = str(doc["_id"])  # Convert ObjectId to string for JSON/templates
+            items.append(doc)
+        return items
+    except Exception as e:
+        print(e)
+        return []
+
+
 # this function creates a new mongoDB item
 # it follows the ItemModel structure from usermodel.py
-def create_item(name, description, price_cents, category, stock, image_urls, tags) -> bool:
-    """Create a new item in the database. Returns True if successful."""
+def create_item(name, description, price_cents, category, stock, image_urls, tags):
+    """Create a new item in the database. Returns inserted_id if successful, None otherwise."""
     # the fields are:
     # _id: ObjectId
     # name: str
@@ -50,10 +69,9 @@ def create_item(name, description, price_cents, category, stock, image_urls, tag
     # tags: List[str]
     if db is None:
         print("Database not initialized")
-        return False
+        return None
     try:
         item = {
-            # "_id": None,  # MongoDB will create this automatically
             "name": name,
             "description": description,
             "price_cents": price_cents,
@@ -62,13 +80,10 @@ def create_item(name, description, price_cents, category, stock, image_urls, tag
             "image_urls": image_urls,
             "tags": tags
         }
-        db["items"].insert_one(item)
-        return True
+        result = db["items"].insert_one(item)
+        return result.inserted_id
     except Exception as e:
         print(e)
-        return False
-    # end of create_item
-    return False
 
 """
 from bson import ObjectId
