@@ -1,49 +1,47 @@
 // this is an admin-only page for item creation
 
 // wait for page to load
-document.addEventListener("DOMContentLoaded", () =>
+document.addEventListener('DOMContentLoaded', () =>
+{
+    const form = document.getElementById('admin-item-form');
+    const result = document.getElementById('admin-item-result');
+    
+    form.addEventListener('submit', async (ev) =>
     {
-    const itemForm = document.getElementById("item-form");
-    if (itemForm)
-        {
-        itemForm.addEventListener("submit", async (e) => 
-            {
-            e.preventDefault();
+        ev.preventDefault();
+        result.textContent = '';
+        const name = document.getElementById('name').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const priceDollars = parseFloat(document.getElementById('price').value) || 0;
+        const price_cents = Math.round(priceDollars * 100);
+        const category = document.getElementById('category').value.trim() || 'other';
+        const stock = parseInt(document.getElementById('stock').value || '0', 10);
+        const image_urls = document.getElementById('image_urls').value.split(',').map(s => s.trim()).filter(Boolean);
+        const tags = document.getElementById('tags').value.split(',').map(s => s.trim()).filter(Boolean);
 
-            const formData = new FormData(itemForm);
-            const data = Object.fromEntries(formData.entries());
-            try
+        try
+        {
+            const resp = await fetch('/admin/items/add',
             {
-                const response = await fetch("/admin/create-item",
-                {
-                    method: "POST",
-                    headers:
-                    {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json",
-                    },
-                    body: JSON.stringify(data), // Send the form data as a JSON string
-                });
-                const result = await response.json();
-                const messageEl = document.getElementById("item-message");
-                if (response.ok)
-                {
-                    messageEl.textContent = "Item created successfully!";
-                    messageEl.classList.remove("d-none", "text-danger");
-                    messageEl.classList.add("text-success");
-                    itemForm.reset();
-                }
-                else
-                {
-                    messageEl.textContent = result.error || "An error occurred.";
-                    messageEl.classList.remove("d-none", "text-success");
-                    messageEl.classList.add("text-danger");
-                }
-            }
-            catch (error)
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({name, description, price_cents, category, stock, image_urls, tags})
+            });
+            const json = await resp.json();
+            if (!resp.ok)
             {
-                console.error("Error creating item:", error);
+                result.innerHTML = `<div class="alert alert-danger">${json.error || json.message || 'Failed to add item'}</div>`;
+                return;
             }
-        });
-    }
+
+            result.innerHTML = `<div class="alert alert-success">Item created${json.inserted_id ? ': ' + json.inserted_id : ''}</div>`;
+            form.reset();
+        } 
+        catch (err)
+        {
+            result.innerHTML = `<div class="alert alert-danger">Network error</div>`;
+            console.error(err);
+        }
+    });
 });
