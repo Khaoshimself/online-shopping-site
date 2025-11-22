@@ -79,7 +79,10 @@ def init_user_management(app: Flask, login_manager: LoginManager):
     @app.route("/index")
     def catalog():
         """Main product catalog/shop page."""
-        return render_template("shop/index.html", title="Shop")
+        from app import database as app_db
+        app_db.init_db()
+        items = app_db.get_items() # get items from mongoDB
+        return render_template("shop/index.html", title="Shop", items=items)
 
     @app.route("/cart")
     def cart():
