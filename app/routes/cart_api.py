@@ -1,25 +1,11 @@
 from flask import Blueprint, jsonify, request, session, url_for
 from flask_login import login_required, current_user
-from pymongo import MongoClient
-from dotenv import load_dotenv
 from datetime import datetime
-import os
 import time
+from app import database as app_db
+from bson import ObjectId
 
 cart_api_bp = Blueprint("cart_api", __name__, url_prefix="/api/cart")
-
-load_dotenv()
-
-mongo_user = os.getenv("MONGO_ROOT_USER")
-mongo_password = os.getenv("MONGO_ROOT_PASSWORD")
-
-client = MongoClient(
-    f"mongodb://{mongo_user}:{mongo_password}@mongo:27017/?authSource=admin"
-)
-db = client["shop"]
-products_col = db["products"]
-discounts_col = db["discount_codes"]
-orders_col = db["orders"]
 
 def _get_cart_data():
     # internal helper function to calculate cart totals
@@ -44,7 +30,7 @@ def _get_cart_data():
 
     #fetch products from Mongo by their id
     products = list(
-        products_col.find({"_id": {"$in": product_ids}})
+        app_db.db["items"].find({"_id": {"$in": product_ids}})
     )
 
     # Map by id for quick lookup
@@ -127,7 +113,7 @@ def add_to_cart():
         return jsonify({"message": "Missing product_id."}), 400
 
     # Verify the product exists in Mongo
-    product = products_col.find_one({"_id": product_id})
+    product = app_db.db["items"].find_one({"_id": product_id})
     if not product:
         return jsonify({"message": "Invalid product."}), 400
 
@@ -157,7 +143,7 @@ def update_cart_item():
         return jsonify({"message": "Missing product_id."}), 400
 
     # verify product still exists just incase admin were to delete for some reason
-    product = products_col.find_one({"_id": product_id})
+    product = app_db.db["items"].find_one({"_id": product_id})
     if not product:
         return jsonify({"message": "Invalid product."}), 400
 
@@ -209,7 +195,7 @@ def apply_discount():
         session.pop("discount_percent", None)
         return jsonify({"ok": False, "message": "Your cart is empty."}), 400
 
-    discount_doc = discounts_col.find_one({"code": code, "is_active": True})
+    discount_doc = app_db.db["discount_codes"].find_one({"code": code, "is_active": True})
     if not discount_doc:
         # Clear any previous discount if they type a bad one
         session.pop("discount_code", None)
@@ -261,7 +247,7 @@ def checkout():
         "status": "pending",  # could be 'pending', 'paid', etc later
     }
 
-    result = orders_col.insert_one(order_doc)
+    result = app_db.db["orders"].insert_one(order_doc)
     order_id = str(result.inserted_id)
 
     # Clear cart + discounts from session
