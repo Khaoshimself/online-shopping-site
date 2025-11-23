@@ -96,28 +96,36 @@ def init_user_management(app: Flask, login_manager: LoginManager):
 
     # Determining the sorting order
         if sort == "price_asc":
-            sort_field = "price"
+            sort_field = "price_cents"
             sort_dir = 1       # low → high
 
         elif sort == "price_desc":
-            sort_field = "price"
+            sort_field = "price_cents"
             sort_dir = -1      # high → low
 
         elif sort == "availability":
-            sort_field = "quantity"
+            sort_field = "stock"
             sort_dir = -1      # most available first
 
         else:
             sort_field = "name"
             sort_dir = 1       # A → Z         
 
-        cursor = products_col.find(mongo_query).sort(sort_field, sort_dir)
-        products = list(cursor)
+        from app import database as app_db
+        app_db.init_db()
+        if app_db.db is None:
+            items = []
+        else:
+            cursor = app_db.db["items"].find(mongo_query).sort(sort_field, sort_dir)
+            items = list(cursor)
+            # Convert ObjectId to string
+            for item in items:
+                item["_id"] = str(item["_id"])
 
         return render_template(
             "shop/index.html",
             title="Shop",
-            products=products,
+            items=items,
             q=q,
             sort=sort,  
         )
@@ -322,7 +330,11 @@ def init_user_management(app: Flask, login_manager: LoginManager):
         except Exception:
             abort(404)
 
-        order = orders_col.find_one({"_id": obj_id})
+        from app import database as app_db
+        app_db.init_db()
+        if app_db.db is None:
+            abort(500)
+        order = app_db.db["orders"].find_one({"_id": obj_id})
         if not order:
             abort(404)
 
