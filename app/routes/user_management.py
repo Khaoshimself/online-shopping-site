@@ -75,22 +75,7 @@ def init_user_management(app: Flask, login_manager: LoginManager):
             pass
 
 
-    # MONGO STUFF
-    from pymongo import MongoClient
-    from dotenv import load_dotenv
-    import os
 
-    load_dotenv()
-
-    mongo_user = os.getenv("MONGO_ROOT_USER")
-    mongo_password = os.getenv("MONGO_ROOT_PASSWORD")
-
-    client = MongoClient(
-        f"mongodb://{mongo_user}:{mongo_password}@mongo:27017/?authSource=admin"
-    )
-    db = client["shop"]
-    products_col = db["products"]
-    orders_col = db["orders"]
 
     @app.route("/")
     @app.route("/index")
