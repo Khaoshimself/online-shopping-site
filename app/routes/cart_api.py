@@ -28,9 +28,26 @@ def _get_cart_data():
 
     product_ids = list(cart_items.keys())
 
-    #fetch products from Mongo by their id
+    # Convert string product_ids to ObjectId for lookup
+    object_ids = []
+    for pid in product_ids:
+        try:
+            object_ids.append(ObjectId(pid))
+        except:
+            pass  # Skip invalid IDs
+    
+    if not object_ids:
+        return {
+            "items": [],
+            "item_count": 0,
+            "subtotal_cents": 0,
+            "tax_cents": 0,
+            "total_cents": 0,
+        }
+
+    # Fetch items from Mongo by their _id
     products = list(
-        app_db.db["items"].find({"_id": {"$in": product_ids}})
+        app_db.db["items"].find({"_id": {"$in": object_ids}})
     )
 
     # Map by id for quick lookup
@@ -42,17 +59,13 @@ def _get_cart_data():
             # Product was deleted or missing then skip it
             continue
 
-        # price is stored as a float in Mongo
-        price = float(product.get("price", 0.0))
-        price_cents = round(price * 100)
+        # price_cents is already stored in cents in ItemModel
+        price_cents = product.get("price_cents", 0)
 
-        # image_path from Mongo, convert to URL for frontend
-        image_path = product.get("image_path")
-        if image_path:
-            image_url = url_for("static", filename=image_path)
-        else:
-            # fallback placeholder for the love of the game
-            image_url = "https://placehold.co/60x60/EFEFEF/333333?text=Item"
+        # image_urls is a list of image URLs from ItemModel
+        image_urls = product.get("image_urls", [])
+        # fallback placeholder for the love of the game
+        image_url = image_urls[0] if image_urls else "https://placehold.co/60x60/EFEFEF/333333?text=Item"
 
         line_total_cents = price_cents * quantity
         subtotal_cents += line_total_cents
@@ -113,7 +126,13 @@ def add_to_cart():
         return jsonify({"message": "Missing product_id."}), 400
 
     # Verify the product exists in Mongo
-    product = app_db.db["items"].find_one({"_id": product_id})
+    # Convert product_id string to ObjectId for lookup
+    try:
+        obj_id = ObjectId(product_id)
+    except:
+        return jsonify({"message": "Invalid product_id."}), 400
+    
+    product = app_db.db["items"].find_one({"_id": obj_id})
     if not product:
         return jsonify({"message": "Invalid product."}), 400
 
@@ -142,19 +161,19 @@ def update_cart_item():
     if not product_id:
         return jsonify({"message": "Missing product_id."}), 400
 
-    # verify product still exists just incase admin were to delete for some reason
-    product = app_db.db["items"].find_one({"_id": product_id})
+    # Verify product still exists
+    try:
+        obj_id = ObjectId(product_id)
+    except:
+        return jsonify({"message": "Invalid product_id."}), 400
+    
+    product = app_db.db["items"].find_one({"_id": obj_id})
     if not product:
         return jsonify({"message": "Invalid product."}), 400
 
-    cart = current_user.get_cart()
-    if quantity > 1:
-        for cart_item in cart:
-            if cart_item["product_id"] == product_id:
-                cart_item["quantity"] = quantity
-                break
-        else:
-            cart.append({"product_id": product_id, "quantity": quantity})
+    cart = session.get("cart", {})
+    if quantity > 0:
+        cart[product_id] = quantity
     else:
         cart.pop(product_id, None)
 
