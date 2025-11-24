@@ -19,7 +19,7 @@
   </form>
   <div>
     <form action="/admin/user/delete" method="POST">
-      <input type="hidden" name="user_id" value="{{ user['_id']|string }}" />
+      <input type="hidden" name="user_id" value="{{ target['_id']|string }}" />
       <button type="submit">Delete</button>
     </form>
   </div>
