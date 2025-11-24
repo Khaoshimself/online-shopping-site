@@ -97,7 +97,56 @@ document.addEventListener('DOMContentLoaded', () =>
                 </tbody>
             </table>
         `;
-        // buttons nonfunctonal for now
+        
+        // add event listeners for edit and delete buttons
+        // edit:
+        listContainer.querySelectorAll('.admin-item-edit').forEach(button =>
+        {
+            button.addEventListener('click', (ev) =>
+            {
+                const itemId = button.closest('tr').getAttribute('data-item-id');
+                const item = items.find(i => i._id === itemId);
+                if(item)
+                {
+                    // call startEditMode function
+                }
+            });
+        });
+
+        // delete:
+        listContainer.querySelectorAll('.admin-item-delete').forEach(button =>
+        {
+            button.addEventListener('click', async (ev) =>
+            {
+                const itemId = button.closest('tr').getAttribute('data-item-id');
+                const itemName = items.find(i => i._id === itemId)?.name || 'this item';
+                if(confirm(`Are you sure you want to delete "${itemName}"? This action cannot be undone.`))
+                {
+                    try
+                    {
+                        const resp = await fetch(`/admin/items/delete/${itemId}`,
+                        {
+                            method: 'POST',
+                            credentials: 'same-origin'
+                        });
+                        const data = await resp.json();
+                        if(!resp.ok)
+                        {
+                            alert(data.error || 'Failed to delete item');
+                            return;
+                        }
+                        // remove item from local array and re-render
+                        items = items.filter(i => i._id !== itemId);
+                        fetchAndDisplayItems();
+                    }
+                    catch(err)
+                    {
+                        alert('Network error');
+                        console.error(err);
+                    }
+                }
+            });
+        });
 
     }
 
