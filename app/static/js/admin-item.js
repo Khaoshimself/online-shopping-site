@@ -29,9 +29,8 @@ document.addEventListener('DOMContentLoaded', () =>
                 return;
             }
             // build the items list
-            // dummy printing for now
             listContainer.innerHTML = '';
-            // FUNCTION CALL HERE
+            renderItems(data.items);
         }
         catch(err)
         {
