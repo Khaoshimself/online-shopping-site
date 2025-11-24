@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template
 import app.database
-from app.database import create_item, init_db
+from app.database import create_item, init_db, update_item
 from app.records.usermodel import ItemCategory
 from app.records.users import User, UserType
 from flask_login import current_user, login_required, login_user
@@ -47,3 +47,25 @@ def admin_items_page():
     if not (isinstance(current_user, User) and current_user.get_permissions() == UserType.ADMIN):
         return "Access denied", 403
     return render_template("admin/items.html", title="Admin — Items")
+
+# edit items from a list
+@items_bp.route("/edit", methods=["POST"])
+@login_required
+def edit_item():
+    if not app.database.init_db():
+        return jsonify({"message": "Internal error"}), 500
+    
+    if not (isinstance(current_user, User) and current_user.get_permissions() == UserType.ADMIN):
+        return jsonify({"message": "Access denied"}), 403
+    
+    payload = request.get_json() or {}
+    try:
+        item_id = payload["item_id"]
+        update_fields = payload.get("update_fields", {})
+        success = app.database.update_item(item_id, update_fields)
+        if success:
+            return jsonify({"success": True}), 200
+        else:
+            return jsonify({"success": False, "message": "Item not found or no changes made"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
