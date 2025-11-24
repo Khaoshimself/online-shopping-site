@@ -147,8 +147,50 @@ document.addEventListener('DOMContentLoaded', () =>
                 }
             });
         });
+    } // end of renderItems
 
-    }
+    function startEditMode(item)
+    {
+        editId = item._id;
+        document.getElementById('name').value = item.name || '';
+        document.getElementById('description').value = item.description || '';
+        document.getElementById('price').value = (item.price_cents / 100).toFixed(2) || '0.00';
+        document.getElementById('category').value = item.category || 'other';
+        document.getElementById('stock').value = item.stock || '0';
+        document.getElementById('image_urls').value = (item.image_urls || []).join(', ');
+        document.getElementById('tags').value = (item.tags || []).join(', ');
+        
+        submitButton.textContent = 'Update Item';
+        result.innerHTML = '';
+
+        // cancel edit button
+        if (!document.getElementById('cancel-edit-button'))
+        {
+            const cancelButton = document.createElement('button');
+            cancelButton.type = 'button';
+            cancelButton.id = 'cancel-edit-button';
+            cancelButton.className = 'btn btn-secondary ml-2';
+            cancelButton.textContent = 'Cancel Edit';
+            cancelButton.addEventListener('click', stopEditMode); // call stopEditMode
+            submitButton.insertAdjacentElement('afterend', cancelButton); // insert button after submit
+        }
+
+        // scroll up to the shiny new form!
+        form.scrollIntoView({behavior: 'smooth', block: 'start'});
+    } // end of startEditMode
+
+    function stopEditMode()
+    {
+        editId = null;
+        form.reset();
+        submitButton.textContent = 'Create Item'; // reset button text
+        const cancelButton = document.getElementById('cancel-edit-button');
+        if (cancelButton) // remove the existing cancel button
+        {
+            cancelButton.remove();
+        }
+        result.innerHTML = '';
+    } // end of stopEditMode
 
     form.addEventListener('submit', async (ev) =>
     {
