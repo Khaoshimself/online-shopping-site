@@ -85,6 +85,21 @@ def create_item(name, description, price_cents, category, stock, image_urls, tag
     except Exception as e:
         print(e)
 
+def update_item(item_id, update_fields):
+    """Update an existing item in the database. Returns True if successful, False otherwise."""
+    if db is None:
+        print("Database not initialized")
+        return False
+    try:
+        result = db["items"].update_one(
+            {"_id": ObjectId(item_id)},
+            {"$set": update_fields}
+        )
+        return result.modified_count > 0
+    except Exception as e:
+        print(e)
+        return False
+
 """
 from bson import ObjectId
 import pymongo
