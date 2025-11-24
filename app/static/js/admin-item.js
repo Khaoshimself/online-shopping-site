@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () =>
     const listContainer = document.getElementById('admin-items-list'); // fetch the list container from HTML -- will hold our items
     const submitButton = document.getElementById('admin-item-submit');
     let editId = null; // track if we are editing an item
+    let items = []; // will hold fetched items
     
 
     async function fetchAndDisplayItems()
@@ -37,6 +38,68 @@ document.addEventListener('DOMContentLoaded', () =>
             listContainer.innerHTML = `<div class="alert alert-danger">Network error</div>`;
             console.error(err);
         }
+    } // end of fetchAndDisplayItems
+
+    function renderItems(items)
+    {
+        if(!items || items.length === 0)
+        {
+            listContainer.innerHTML = '<div class="alert alert-info">No items found.</div>';
+            return;
+        }
+
+        const tableRows = items.map(item => 
+        {
+            const imgHtml = (item.image_urls && item.image_urls.length > 0)
+            ? (() => // if there IS an item image url, create an img element
+                {
+                    const img = document.createElement('img');
+                    img.src = item.image_urls[0];
+                    img.alt = item.name || '';
+                    img.style.maxWidth = '50px';
+                    img.style.maxHeight = '50px';
+                    return img.outerHTML;
+                })()
+            : 'No Image'; // else, just say "No Image"
+
+            // build an HTML table row for each item
+            return `
+                <tr data-item-id="${item._id}">
+                    <td>${item._id}</td>
+                    <td>${imgHtml}</td>
+                    <td>${item.name || ''}</td>
+                    <td>${(item.price_cents / 100).toFixed(2)}</td>
+                    <td>${item.category || ''}</td>
+                    <td>${item.stock || 0}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary admin-item-edit">Edit</button>
+                        <button class="btn btn-sm btn-danger admin-item-delete">Delete</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // now put the rows into the list container
+        listContainer.innerHTML = `
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Price ($)</th>
+                        <th>Category</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+        `;
+        // buttons nonfunctonal for now
+
     }
 
     form.addEventListener('submit', async (ev) =>
