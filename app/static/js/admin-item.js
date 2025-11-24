@@ -6,7 +6,9 @@ document.addEventListener('DOMContentLoaded', () =>
     const form = document.getElementById('admin-item-form');
     const result = document.getElementById('admin-item-result');
     const listContainer = document.getElementById('admin-items-list'); // fetch the list container from HTML -- will hold our items
-    const submitButton = document.getElementById('admin-item-submit');
+    // prefer an explicit id but fall back to the form's submit button
+    let submitButton = document.getElementById('admin-item-submit');
+    if (!submitButton && form) submitButton = form.querySelector('button[type="submit"]');
     let editId = null; // track if we are editing an item
     let items = []; // will hold fetched items
     
@@ -23,14 +25,15 @@ document.addEventListener('DOMContentLoaded', () =>
                 listContainer.innerHTML = `<div class="alert alert-danger">${data.error || 'Failed to load items'}</div>`;
                 return;
             }
-            if(data.items.length === 0) // check if there are no items
+            items = data.items || [];
+            if(items.length === 0) // check if there are no items
             {
                 listContainer.innerHTML = '<div class="alert alert-info">No items found.</div>';
                 return;
             }
             // build the items list
             listContainer.innerHTML = '';
-            renderItems(data.items);
+            renderItems(items);
         }
         catch(err)
         {
@@ -39,15 +42,15 @@ document.addEventListener('DOMContentLoaded', () =>
         }
     } // end of fetchAndDisplayItems
 
-    function renderItems(items)
+    function renderItems(itemsList)
     {
-        if(!items || items.length === 0)
+        if(!itemsList || itemsList.length === 0)
         {
             listContainer.innerHTML = '<div class="alert alert-info">No items found.</div>';
             return;
         }
 
-        const tableRows = items.map(item => 
+        const tableRows = itemsList.map(item => 
         {
             const imgHtml = (item.image_urls && item.image_urls.length > 0)
             ? (() => // if there IS an item image url, create an img element
@@ -105,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () =>
             button.addEventListener('click', (ev) =>
             {
                 const itemId = button.closest('tr').getAttribute('data-item-id');
-                const item = items.find(i => i._id === itemId);
+                const item = itemsList.find(i => i._id === itemId);
                 if(item)
                 {
                     startEditMode(item);
@@ -119,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () =>
             button.addEventListener('click', async (ev) =>
             {
                 const itemId = button.closest('tr').getAttribute('data-item-id');
-                const itemName = items.find(i => i._id === itemId)?.name || 'this item';
+                const itemName = itemsList.find(i => i._id === itemId)?.name || 'this item';
                 if(confirm(`Are you sure you want to delete "${itemName}"? This action cannot be undone.`))
                 {
                     try
