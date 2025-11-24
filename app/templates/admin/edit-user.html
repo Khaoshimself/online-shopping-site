@@ -1,0 +1,27 @@
+{% extends "base.html" %} {% block content %}
+<div class="container py-5">
+  <h2>Admin — Edit User</h2>
+  <form id="admin-user-form" class="mt-4" action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.username.label }}<br />
+      {{ form.username(size=32) }}
+    </div>
+    <div class="mb-3">
+      {{ form.new_password.label }}<br />
+      {{ form.new_password(size=32) }}
+    </div>
+    <div class="mb-3">
+      {{ form.permissions.label }}<br />
+      {{ form.permissions(size=32) }}
+    </div>
+    <div class="mb-3">{{ form.submit() }}</div>
+  </form>
+  <div>
+    <form action="/admin/user/delete" method="POST">
+      <input type="hidden" name="user_id" value="{{ user['_id']|string }}" />
+      <button type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

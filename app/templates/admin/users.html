@@ -1,0 +1,40 @@
+{% extends "base.html" %} {% block content %}
+<div class="container py-5">
+  <h2>Admin — Users</h2>
+  <div class="row mb-4 justify-content-center">
+    {% if page > 0 %}
+    <a href="/admin/users?page={{ page-1 }}">Prev Page</a>
+    {% endif %} {% if page +1 < total_pages %}
+    <a class="text-end" href="/admin/users?page={{ page+1 }}">Next Page</a>
+    {% endif %}
+  </div>
+  <div class="table-responsive mb-4">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>_id</th>
+          <th>Name</th>
+          <th>Permissions</th>
+          <th>Edit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user['_id']|string }}</td>
+          <td>{{ user['name'] }}</td>
+          <td>{{ user['permissions'] }}</td>
+          <td>
+            {% if user['_id']|string == current_user.get_id() %}
+            <p>Its You!</p>
+            {% else %}
+            <a href="/admin/users/edit/{{ user['_id']|string }}">Edit</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

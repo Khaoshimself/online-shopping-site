@@ -106,11 +106,12 @@ class User(UserMixin):
 
     def get_cart(self) -> List[CartItem]:
         return self.model["cart"]
-    def update_cart(self,new_cart: List[CartItem] ) -> bool:
+
+    def update_cart(self, new_cart: List[CartItem]) -> bool:
         u = get_users()
         if u is None:
             return False
-        u.update_one({"_id":self.model["_id"]}, {"$set": {"cart": new_cart}})
+        u.update_one({"_id": self.model["_id"]}, {"$set": {"cart": new_cart}})
         return True
 
     def new_auth_token(self) -> Optional[str]:
@@ -144,6 +145,12 @@ class User(UserMixin):
 
         u.update_one({"_id": self.model["_id"]}, {"$set": {"name": username}})
 
+    def update_permissions(self, permission: UserType):
+        u = get_users()
+        if u is None:
+            return None
+        u.update_one({"_id": self.model["_id"]}, {"$set": {"permissions": permission}})
+
     def delete_user(self) -> None:
         u = get_users()
         if u is None:
@@ -167,6 +174,16 @@ def db_user_verify_login(name: str, password: str) -> Optional[User]:
         except argon2.exceptions.VerificationError:
             return None
     return None
+
+
+def find_user(id: ObjectId) -> Optional[User]:
+    u = get_users()
+    if u is None:
+        return None
+    model = u.find_one({"_id": id})
+    if model is None:
+        return None
+    return User(model)
 
 
 # Was getting DB issues so I commented it out
