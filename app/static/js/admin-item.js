@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () =>
         }
         catch(err)
         {
-            listContainer.innerHTML = `<div class="alert alert-danger">Network error</div>`;
+            listContainer.innerHTML = `<div class="alert alert-danger">Network error: ${err.message}</div>`;
             console.error(err);
         }
     } // end of fetchAndDisplayItems
@@ -207,27 +207,58 @@ document.addEventListener('DOMContentLoaded', () =>
 
         try
         {
-            const resp = await fetch('/admin/items/add',
+            // const resp = await fetch('/admin/items/add',
+            let resp, json; // define resp and json as variables; these will change based on add vs edit
+            if(editId) // if we are editing an item...
             {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'same-origin',
-                body: JSON.stringify({name, description, price_cents, category, stock, image_urls, tags})
-            });
-            const json = await resp.json();
-            if (!resp.ok)
-            {
-                result.innerHTML = `<div class="alert alert-danger">${json.error || json.message || 'Failed to add item'}</div>`;
-                return;
+                // get the fields to update
+                // this is in list form in case we want to update some stuff and not others
+                const update_fields = {name, description, price_cents, category, stock, image_urls, tags};
+                resp = await fetch('/admin/items/edit',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({item_id: editId, update_fields})
+                });
+                json = await resp.json();
+                if (!resp.ok)
+                {
+                    result.innerHTML = `<div class="alert alert-danger">${json.error || json.message || 'Failed to update item'}</div>`;
+                    return;
+                }
+                result.innerHTML = `<div class="alert alert-success">Item updated</div>`;
+                stopEditMode(); // exit edit mode
+                fetchAndDisplayItems(); // refresh the items list
             }
-
-            result.innerHTML = `<div class="alert alert-success">Item created${json.inserted_id ? ': ' + json.inserted_id : ''}</div>`;
-            form.reset();
+            else
+            {
+                resp = await fetch('/admin/items/add',
+                    {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({name, description, price_cents, category, stock, image_urls, tags})
+                    });
+                
+                json = await resp.json();
+                if (!resp.ok)
+                {
+                    result.innerHTML = `<div class="alert alert-danger">${json.error || json.message || 'Failed to add item'}</div>`;
+                    return;
+                }
+                result.innerHTML = `<div class="alert alert-success">Item added with ID: ${json.item_id}</div>`;
+                form.reset();
+                fetchAndDisplayItems(); // refresh the items list
+            }
         } 
         catch (err)
         {
-            result.innerHTML = `<div class="alert alert-danger">Network error</div>`;
+            result.innerHTML = `<div class="alert alert-danger">Network error: ${err.message}</div>`;
             console.error(err);
         }
     });
+
+    // initial fetch of items
+    fetchAndDisplayItems();
 });
