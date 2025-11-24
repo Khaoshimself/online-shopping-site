@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () =>
                 const item = items.find(i => i._id === itemId);
                 if(item)
                 {
-                    // call startEditMode function
+                    startEditMode(item);
                 }
             });
         });
