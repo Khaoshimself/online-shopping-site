@@ -52,6 +52,7 @@ def admin_orders_page():
             sort_by = "created_at"
     on_page = orders.aggregate(
         [
+            {"$match": {"$and": [{"status": status}]}},
             {
                 "$sort": {
                     sort_by: (
