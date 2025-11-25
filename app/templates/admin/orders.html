@@ -1,0 +1,95 @@
+{% extends "base.html" %} {% block content %}
+<div class="container py-5">
+  <h2>Admin — Orders</h2>
+  <form method="get" class="row mb-4 justify-content-center">
+
+      <input hidden name="page" value="0" />
+    <div class="col-md-3 mb-2 mb-md-0">
+      <select name="sort" class="form-select">
+        <option value="date" {% if sort=="date" %} selected {% endif %}>
+          Date
+        </option>
+        <option value="owner" {% if sort=="owner" %} selected {% endif %}>
+          Owner
+        </option>
+        <option value="value" {% if sort=="value" %} selected {% endif %}>
+          Total
+        </option>
+      </select>
+		</div>
+
+    <div class="col-md-3 mb-2 mb-md-0">
+      <select name="sort_direction" class="form-select">
+        <option value="0" {% if sort_direction=="0" %} selected {% endif %}>
+          Descending
+        </option>
+        <option value="1" {% if sort_direction=="1" %} selected {% endif %}>
+          Ascending
+        </option>
+      </select>
+		</div>
+
+    <div class="col-md-3 mb-2 mb-md-0">
+			<select name="status" class="form-select">
+			<option value="any" {% if status == 'any' %}selected{% endif %}>
+					Any
+				</option>
+				<option value="pending" {% if status == 'pending' %}selected{% endif %}>
+					Pending
+				</option>
+				<option value="fulfilled" {% if status == 'fulfilled' %}selected{% endif %}>
+					Fulfilled
+				</option>
+			</select>
+
+    </div>
+	<div class="col-md-2 d-grid">
+      <button class="btn btn-primary" type="submit">
+        Apply
+      </button>
+    </div>
+  </form>
+  <div class="row mb-4 justify-content-center">
+    {% if page > 0 %}
+    <a
+      href="/admin/orders?page={{ page-1 }}&sort={{sort}}&sort_direction={{sort_direction}}&status={{status}}"
+      >Prev Page</a
+    >
+    {% endif %}{% if page +1 < total_pages %}
+    <a
+      class="text-end"
+      href="/admin/orders?page={{ page+1 }}&sort={{sort}}&sort_direction={{sort_direction}}&status={{status}}"
+      >Next Page</a
+    >
+    {% endif %}
+  </div>
+  <div class="table-responsive mb-4">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>_id</th>
+          <th>owner</th>
+          <th>items</th>
+          <th>total</th>
+          <th>date</th>
+          <th>status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>{{ order['_id']|string }}</td>
+          <td>{{ order['owner'] }}</td>
+          <td>
+            {% for item in order['items'] %} {{ item['name'] }} {% endfor %}
+          </td>
+          <td>{{ order['total_cents']/100 }}</td>
+          <td>{{ order['created_at'] }}</td>
+          <td>{{ order['status'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
