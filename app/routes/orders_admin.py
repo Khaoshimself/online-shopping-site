@@ -50,20 +50,39 @@ def admin_orders_page():
             sort_by = "total_cents"
         case _:
             sort_by = "created_at"
-    on_page = orders.aggregate(
-        [
-            {"$match": {"$and": [{"status": status}]}},
-            {
-                "$sort": {
-                    sort_by: (
-                        pymongo.DESCENDING if sort_direction == 0 else pymongo.ASCENDING
-                    )
-                }
-            },
-            {"$skip": page * 25},
-            {"$limit": 25},
-        ]
-    )
+    if status == "any":
+        on_page = orders.aggregate(
+            [
+                {
+                    "$sort": {
+                        sort_by: (
+                            pymongo.DESCENDING
+                            if sort_direction == 0
+                            else pymongo.ASCENDING
+                        )
+                    }
+                },
+                {"$skip": page * 25},
+                {"$limit": 25},
+            ]
+        )
+    else:
+        on_page = orders.aggregate(
+            [
+                {"$match": {"$and": [{"status": status}]}},
+                {
+                    "$sort": {
+                        sort_by: (
+                            pymongo.DESCENDING
+                            if sort_direction == 0
+                            else pymongo.ASCENDING
+                        )
+                    }
+                },
+                {"$skip": page * 25},
+                {"$limit": 25},
+            ]
+        )
     total_pages = (total_orders + 24) // 25
 
     return render_template(
