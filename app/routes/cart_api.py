@@ -85,31 +85,31 @@ def _get_cart_data():
             }
         )
 
-        # --- Discount handling --- # FIXXXXX
-        applied_code = session.get("discount_code")
-        discount_percent = float(session.get("discount_percent", 0))
+    # --- Discount handling --- # FIXXXXX
+    applied_code = session.get("discount_code")
+    discount_percent = float(session.get("discount_percent", 0))
 
-        discount_cents = 0
-        if discount_percent > 0 and subtotal_cents > 0:
-            discount_cents = round(subtotal_cents * (discount_percent / 100.0))
+    discount_cents = 0
+    if discount_percent > 0 and subtotal_cents > 0:
+        discount_cents = round(subtotal_cents * (discount_percent / 100.0))
 
-        # Subtotal after discount
-        subtotal_after_discount = subtotal_cents - discount_cents
+    # Subtotal after discount
+    subtotal_after_discount = subtotal_cents - discount_cents
 
-        # Tax (8.25%) applied after discount
-        tax_cents = round(subtotal_after_discount * 0.0825)
-        total_cents = subtotal_after_discount + tax_cents
+    # Tax (8.25%) applied after discount
+    tax_cents = round(subtotal_after_discount * 0.0825)
+    total_cents = subtotal_after_discount + tax_cents
 
-        return {
-            "items": line_items,
-            "item_count": item_count,
-            "subtotal_cents": subtotal_cents,
-            "discount_cents": discount_cents,
-            "tax_cents": tax_cents,
-            "total_cents": total_cents,
-            "discount_code": applied_code,
-            "discount_percent": discount_percent,
-        }
+    return {
+        "items": line_items,
+        "item_count": item_count,
+        "subtotal_cents": subtotal_cents,
+        "discount_cents": discount_cents,
+        "tax_cents": tax_cents,
+        "total_cents": total_cents,
+        "discount_code": applied_code,
+        "discount_percent": discount_percent,
+    }
 
 
 @cart_api_bp.route("", methods=["GET"])
