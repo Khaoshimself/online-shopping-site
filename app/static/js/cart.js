@@ -359,6 +359,9 @@ function showNotification(toast, message, type = "success") {
   const toastHeader = toast._element.querySelector(".toast-header");
 
   toastBody.textContent = message;
+  // change title
+  toastTitle = toast._element.querySelector("#toast-title");
+  toastTitle.textContent = type === "success" ? "Success" : "Error";
   // Set color based on success/error
   toastHeader.classList.remove("bg-success", "bg-danger", "text-white");
   toastHeader.classList.remove("toast-success", "toast-error");
@@ -369,6 +372,7 @@ function showNotification(toast, message, type = "success") {
     "text-white"
   );
   toastHeader.classList.add(type === "success" ? "toast-success" : "toast-error");
+  
 
   toast.show();
 }
