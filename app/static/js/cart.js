@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const newQuantity = parseInt(
           target.closest("tr").querySelector(".cart-quantity-input").value
         );
-        updateCartItem(productId, newQuantity, cartTableBody, toastEl);
+        updateCartItem(productId, newQuantity, cartTableBody, notificationToast);
       } else if (action === "remove-item") {
         removeCartItem(productId, cartTableBody);
       }
