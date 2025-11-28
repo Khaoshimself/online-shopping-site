@@ -180,6 +180,11 @@ def update_cart_item():
     if not product:
         return jsonify({"message": "Invalid product."}), 400
 
+    # check that the quantity does not exceed stock
+    product_stock = product.get("stock") or 0
+    if quantity > product_stock:
+        return jsonify({"message": f"Cannot set quantity to {quantity}. Only {product_stock} in stock."}), 400
+
     cart = session.get("cart", {})
     if quantity > 0:
         cart[product_id] = quantity
