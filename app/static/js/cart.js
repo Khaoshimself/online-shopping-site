@@ -361,10 +361,14 @@ function showNotification(toast, message, type = "success") {
   toastBody.textContent = message;
   // Set color based on success/error
   toastHeader.classList.remove("bg-success", "bg-danger", "text-white");
+  toastHeader.classList.remove("toast-success", "toast-error");
+
+
   toastHeader.classList.add(
     type === "success" ? "bg-success" : "bg-danger",
     "text-white"
   );
+  toastHeader.classList.add(type === "success" ? "toast-success" : "toast-error");
 
   toast.show();
 }
