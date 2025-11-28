@@ -278,7 +278,7 @@ async function loadCartTable(cartTableBody) {
 /**
  * 3. Updates an item's quantity in the cart
  */
-async function updateCartItem(productId, quantity, cartTableBody) {
+async function updateCartItem(productId, quantity, cartTableBody, toast) {
   try {
     const response = await fetch("/api/cart/update", {
       method: "POST",
@@ -292,6 +292,7 @@ async function updateCartItem(productId, quantity, cartTableBody) {
     updateCartCountBadge(data.item_count); // Update badge (matches backend shape)
   } catch (error) {
     console.error("Error updating cart:", error);
+    showNotification(toast, error.message, "danger");
   }
 }
 
