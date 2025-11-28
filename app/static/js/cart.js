@@ -285,11 +285,11 @@ async function updateCartItem(productId, quantity, cartTableBody, toast) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ product_id: productId, quantity: quantity }),
     });
-    if (!response.ok) throw new Error("Could not update item");
-
     const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Could not update item");
+
     loadCartTable(cartTableBody); // Reload the table (will also recalc discount/tax/total)
-    updateCartCountBadge(data.item_count); // Update badge (matches backend shape)
+    updateCartCountBadge(data.item_count); // Update badge
   } catch (error) {
     console.error("Error updating cart:", error);
     showNotification(toast, error.message, "danger");
