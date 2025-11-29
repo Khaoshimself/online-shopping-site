@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () =>
                     }
                     catch(err)
                     {
-                        alert('Network error');
+                        alert(`Network error: ${err.message}`);
                         console.error(err);
                     }
                 }
