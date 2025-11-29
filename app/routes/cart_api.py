@@ -229,8 +229,8 @@ def apply_discount():
         session.pop("discount_percent", None)
         return jsonify({"ok": False, "message": "Your cart is empty."}), 400
 
-    discount_doc = app.database.db["discount_codes"].find_one(
-        {"code": code, "is_active": True}
+    discount_doc = app.database.db["discounts"].find_one(
+        {"code": code} # {"code": code, "is_active": True}"}
     )
     if not discount_doc:
         # Clear any previous discount if they type a bad one
@@ -238,7 +238,7 @@ def apply_discount():
         session.pop("discount_percent", None)
         return jsonify({"ok": False, "message": "Invalid or expired code."}), 404
 
-    percent_off = float(discount_doc.get("percent_off", 0))
+    percent_off = float(discount_doc.get("discount_percent", 0))
 
     # Save discount in session
     session["discount_code"] = code
