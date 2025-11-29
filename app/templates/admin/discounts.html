@@ -2,24 +2,25 @@
 {% block content %}
 <div class="container py-5">
   <h2>Admin — Create Discount</h2>
-  <form id="admin-discount-form" class="mt-4">
+  <form id="discount-form" class="mt-4">
     <div class="mb-3">
       <label class="form-label">Discount Code</label>
-      <input id="code" class="form-control" required>
+      <input id="discount-code" class="form-control" required>
     </div>
     <div class="mb-3">
       <label class="form-label">Discount Percentage</label>
-      <input id="percentage" type="number" step="0.01" class="form-control" required>
+      <input id="discount-percentage" type="number" step="0.01" class="form-control" required>
     </div>
     <div class="mb-3">
-    <button class="btn btn-primary" type="submit">Create Discount</button>
+      <button id="discount-submit-button" class="btn btn-primary" type="submit">Create Discount</button>
+    </div>
   </form>
 
-  <div id="admin-discount-result" class="mt-3"></div>
+  <div id="discount-result" class="mt-3"></div>
 
   <hr class="my-5">
   <h3>Manage Discounts</h3>
-  <div id="admin-discount-list" class="mt-3"></div>
+  <div id="discount-list-container" class="mt-3"></div>
 </div>
 
 <script src="{{ url_for('static', filename='js/admin-discount.js') }}"></script>

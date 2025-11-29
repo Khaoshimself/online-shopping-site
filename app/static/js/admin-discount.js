@@ -49,10 +49,10 @@ document.addEventListener('DOMContentLoaded', () =>
             return `
                 <tr>
                     <td>${discount.code}</td>
-                    <td>${discount.percentage}%</td>
+                    <td>${discount.discount_percent}%</td>
                     <td>
-                        <button class="btn btn-sm btn-primary edit-discount-btn" data-id="${discount._id}">Edit</button>
-                        <button class="btn btn-sm btn-danger delete-discount-btn" data-id="${discount._id}">Delete</button>
+                        <button class="btn btn-sm btn-primary edit-discount-btn" data-id="${discount.id}">Edit</button>
+                        <button class="btn btn-sm btn-danger delete-discount-btn" data-id="${discount.id}">Delete</button>
                     </td>
                 </tr>
             `;
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () =>
             button.addEventListener('click', () =>
             {
                 const discountId = button.getAttribute('data-id');
-                const discount = discounts.find(d => d._id === discountId);
+                const discount = discounts.find(d => d.id === discountId);
                 if(discount)
                 {   
                     startEditDiscount(discount);
@@ -94,15 +94,17 @@ document.addEventListener('DOMContentLoaded', () =>
             button.addEventListener('click', async (ev) =>
             {
                 const discountId = button.getAttribute('data-id');
-                const discountCode = discounts.find(d => d._id === discountId)?.code || 'this discount';
+                const discountCode = discounts.find(d => d.id === discountId)?.code || 'this discount';
                 if(confirm(`Are you sure you want to delete discount "${discountCode}"? This action cannot be undone.`))
                 {
                     try
                     {
-                        const response = await fetch(`/admin/discounts/delete/${discountId}`,
+                        const response = await fetch(`/admin/discounts/delete`,
                         {
                             method: 'POST',
-                            credentials: 'same-origin'
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({discount_id: discountId})
                         });
                         const data = await response.json();
                         if(!response.ok)
@@ -111,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () =>
                             return;
                         }
                         // remove discount from array and re-render
-                        discounts = discounts.filter(d => d._id !== discountId);
+                        discounts = discounts.filter(d => d.id !== discountId);
                         fetchAndDisplayDiscounts();
                     }
                     catch(err)
@@ -126,9 +128,9 @@ document.addEventListener('DOMContentLoaded', () =>
 
     function startEditDiscount(discount)
     {
-        editId = discount._id;
+        editId = discount.id;
         document.getElementById('discount-code').value = discount.code;
-        document.getElementById('discount-percentage').value = discount.percentage;
+        document.getElementById('discount-percentage').value = discount.discount_percent;
 
         submitButton.value = 'Update Discount';
         result.innerHTML = '';
@@ -180,13 +182,13 @@ document.addEventListener('DOMContentLoaded', () =>
             if(editId)
             {
                 // get the fields we're changing
-                const update_fields = {code, percentage};
-                resp = await fetch('/admin/discounts/edit/',
+                const update_fields = {code, discount_percent: percentage};
+                resp = await fetch('/admin/discounts/edit',
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'same-origin',
-                    body: JSON.stringify({id: editId, update_fields})
+                    body: JSON.stringify({discount_id: editId, update_fields})
                 });
                 json = await resp.json();
                 if(!resp.ok)
@@ -200,12 +202,12 @@ document.addEventListener('DOMContentLoaded', () =>
             }
             else
             {
-                resp = await fetch('/admin/discounts/add/',
+                resp = await fetch('/admin/discounts/add',
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'same-origin',
-                    body: JSON.stringify({code, percentage})
+                    body: JSON.stringify({code, discount_percent: percentage})
                 });
 
                 json = await resp.json();
