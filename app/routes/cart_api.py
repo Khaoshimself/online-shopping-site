@@ -230,7 +230,7 @@ def apply_discount():
         return jsonify({"ok": False, "message": "Your cart is empty."}), 400
 
     discount_doc = app.database.db["discounts"].find_one(
-        {"code": code} # {"code": code, "is_active": True}"}
+        {"code": {"$regex": f"^{code}$", "$options": "i"}}
     )
     if not discount_doc:
         # Clear any previous discount if they type a bad one
